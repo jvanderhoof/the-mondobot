@@ -9,9 +9,10 @@ gem 'faye-websocket'
 gem 'sinatra'
 gem 'dotenv'
 
+# dependencies
+gem 'json-schema'
+
 group :development do
   gem 'heroku_builder'
 
-  # dependencies
-  gem 'json-schema'
 end

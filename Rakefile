@@ -1,5 +1,12 @@
 require 'bundler'
-Bundler.setup
+require 'bundler/setup'
+Bundler.require(:default)
+
+#Bundler.setup
+Dotenv.load
+
+require 'yaml'
+require 'erb'
 
 Bundler.load.specs.each do |spec|
   spec.load_paths.each do |load_path|
