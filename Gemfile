@@ -14,5 +14,4 @@ gem 'json-schema'
 
 group :development do
   gem 'heroku_builder'
-
 end
