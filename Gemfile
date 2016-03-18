@@ -7,9 +7,9 @@ gem 'eventmachine'
 gem 'faye-websocket'
 
 gem 'sinatra'
+gem 'dotenv'
 
 group :development do
-  gem 'dotenv'
   gem 'heroku_builder'
 
   # dependencies

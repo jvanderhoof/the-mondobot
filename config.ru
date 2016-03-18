@@ -4,7 +4,6 @@ require 'bundler'
 Bundler.require
 Dotenv.load
 
-require 'tilt/erb'
-require './app'
+require './mondobot'
 
-run App
+run Mondobot

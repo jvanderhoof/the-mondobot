@@ -1,5 +1,5 @@
 ---
-staging:
+:
   app:
     name: my-heroku-app-name-staging
     git_branch: staging
@@ -12,10 +12,11 @@ staging:
       type: Free
 production:
   app:
-    name: my-heroku-app-name
+    name: the-mondobot
     git_branch: master
   config_vars:
-  - BUILDPACK_URL: https://github.com/ddollar/heroku-buildpack-multi.git
+    - BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-ruby.git
+  - SLACK_API_TOKEN: <%= ENV['SLACK_API_TOKEN'] %>
   addons: []
   resources:
     web:

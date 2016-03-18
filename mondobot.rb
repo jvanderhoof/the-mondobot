@@ -1,6 +1,10 @@
-class App < Sinatra::Base
+class Mondobot < Sinatra::Base
   post '/heroku' do
+    log(params)
+  end
 
+  get '/testing' do
+    "testing: 1,2,3....."
   end
 
   private
