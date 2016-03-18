@@ -12,6 +12,6 @@ gem 'dotenv'
 # dependencies
 gem 'json-schema'
 
-group :development do
+#group :development do
   gem 'heroku_builder'
-end
+#end
