@@ -6,10 +6,11 @@ class Mondobot < Sinatra::Base
   end
 
   get '/testing' do
-    "testing: 1,2,3....."
+    'testing: 1, 2, 3, .....'
   end
 
   private
+
   def log(msg)
     @log ||= Logger.new(STDOUT)
     @log.error(msg)
@@ -23,18 +24,26 @@ class Mondobot < Sinatra::Base
 
   def app_to_channel(app)
     {
-      'the-mondobot' => 'testing-grounds'
+      'the-mondobot' => '#testing-grounds'
     }[app]
   end
 
+  def slack_message(channel, message)
+    client.chat_postMessage(
+      channel: channel,
+      text: message,
+      as_user: true
+    )
+  end
+
   def heroku_message(msg_hsh)
-    app = msg_hsh["app"]
-    channel = "##{app_to_channel(app)}"
+    app = msg_hsh['app']
     message = <<-EOF
     <!here> *#{app}* was deployed with the following changes:
     `#{msg_hsh['git_log']}`
     EOF
-    client.chat_postMessage(channel: channel, text: message, as_user: true)
+    app_to_channel(app).split(',').each do |channel|
+      slack_message(channel, message)
+    end
   end
-
 end
