@@ -24,7 +24,15 @@ class Mondobot < Sinatra::Base
 
   def app_to_channel(app)
     {
-      'the-mondobot' => '#testing-grounds'
+      'the-mondobot' => '#testing-grounds',
+      'foxinsight-dev' => '#mjff',
+      'foxinsight-staging' => '#mjff',
+      'pcrt-web-1781' => '#mjff',
+      'foxinsight-clinical-trial' => '#mjff',
+      'foxinsight-clinical-trial-dev' => '#mjff',
+      'foxinsight-clinical-trial-stg' => '#mjff',
+      'fi-survey-builder-dev' => '#mjff',
+      'fi-survey-builder-stg' => '#mjff'
     }[app]
   end
 
