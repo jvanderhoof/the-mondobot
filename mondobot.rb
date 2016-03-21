@@ -6,7 +6,8 @@ class Mondobot < Sinatra::Base
   end
 
   post '/github' do
-    log(params)
+    body = JSON.parse(request.body.read)
+    log(body.to_yaml)
     halt 200
   end
 
