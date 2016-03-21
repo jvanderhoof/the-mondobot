@@ -23,7 +23,7 @@ This project utilizes the Heroku Builder gem for configuration and deployment.  
 ## Configuration
 
 ### Heroku
-Adding Heroku notifications to a channel is a two step process. Fist, add the Heroku project and Slack channle to the `app_to_channel` method in the `mondobot.rb` class:
+Adding Heroku notifications to a channel is a two step process. Fist, add the Heroku project and Slack channel to the `app_to_channel` method in the `mondobot.rb` class:
 
 ```ruby
   def app_to_channel(app)
