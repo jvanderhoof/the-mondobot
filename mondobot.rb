@@ -6,7 +6,8 @@ class Mondobot < Sinatra::Base
   end
 
   post '/github' do
-    log(request.body.read)
+    #log(request.body.read)
+    github_pr_message(request.body.read)
     halt 200
   end
 
@@ -49,11 +50,22 @@ class Mondobot < Sinatra::Base
     )
   end
 
+  def github_pr_message(msg)
+    message = JSON.parse(msg)
+    comment = message['pull_request']['body']
+    comment.scan(/@([\w\d]+)/).each do |user|
+      puts "user: #{user}"
+    end
+    #raise comment
+  end
+
   def heroku_message(msg_hsh)
     app = msg_hsh['app']
     message = <<-EOF
     <!here> *#{app}* was deployed with the following changes:
-    `#{msg_hsh['git_log']}`
+    ```
+    #{msg_hsh['git_log']}
+    ```
     EOF
     app_to_channel(app).split(',').each do |channel|
       slack_message(channel, message)
