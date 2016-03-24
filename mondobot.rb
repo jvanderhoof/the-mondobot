@@ -42,7 +42,18 @@ class Mondobot < Sinatra::Base
     }[app]
   end
 
-  def slack_message(channel, message)
+  # translate github handle to slack user. If they are the same, no need to add :)
+  def github_user_to_slack_user(user)
+    {
+      'Jasmine-Feldmann' => 'jasminefeldmann',
+      'jmyers0022' => 'jake',
+      'mhfen' => 'fender',
+      'mrjman' => 'jesse',
+      'subsociety' => 'jonmck'
+    }[user] || user
+  end
+
+  def post_message(channel, message)
     client.chat_postMessage(
       channel: channel,
       text: message,
@@ -50,13 +61,22 @@ class Mondobot < Sinatra::Base
     )
   end
 
-  def github_pr_message(msg)
-    message = JSON.parse(msg)
-    comment = message['pull_request']['body']
-    comment.scan(/@([\w\d]+)/).each do |user|
-      puts "user: #{user}"
+  def message_to_slack(project_name, message)
+    app_to_channel(project_name).split(',').each do |channel|
+      post_message(channel, message)
     end
-    #raise comment
+  end
+
+  def github_pr_message(msg)
+    webhook = JSON.parse(msg)
+    users = webhook['pull_request']['body'].scan(/@([\w\d]+)/).flatten.map { |user| github_user_to_slack_user(user) }
+    return if users.empty?
+    msg = "#{user_callout(users).join(', ')} - PR Review Requested: #{webhook['pull_request']['html_url']}"
+    message_to_slack(webhook['repository']['name'], msg)
+  end
+
+  def user_callout(users)
+    [*users].map { |user| "@#{user}" }
   end
 
   def heroku_message(msg_hsh)
@@ -67,8 +87,6 @@ class Mondobot < Sinatra::Base
     #{msg_hsh['git_log']}
     ```
     EOF
-    app_to_channel(app).split(',').each do |channel|
-      slack_message(channel, message)
-    end
+    message_to_slack(app, message)
   end
 end
