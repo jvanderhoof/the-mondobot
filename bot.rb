@@ -15,7 +15,7 @@ client.auth_test
 
 
 channel = "#testing-grounds"
-client.chat_postMessage(channel: channel, text: '<!here> Hello World', as_user: true)
+client.chat_postMessage(channel: channel, text: '<mailto:jason@mondorobot.com|jvanderhoof> Hello World', as_user: true)
 
 #channels = client.channels_list.channels
 

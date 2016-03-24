@@ -69,6 +69,7 @@ class Mondobot < Sinatra::Base
 
   def github_pr_message(msg)
     webhook = JSON.parse(msg)
+    return unless webhook.key?('pull_request') && webhook['pull_request'].key?('body')
     users = webhook['pull_request']['body'].scan(/@([\w\d]+)/).flatten.map { |user| github_user_to_slack_user(user) }
     return if users.empty?
     msg = "#{user_callout(users).join(', ')} - PR Review Requested: #{webhook['pull_request']['html_url']}"
