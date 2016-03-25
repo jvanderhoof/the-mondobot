@@ -5,6 +5,7 @@ production:
   config_vars:
     - BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-ruby.git
     - SLACK_API_TOKEN: <%= ENV['SLACK_API_TOKEN'] %>
+    - LOG_LEVEL: debug
   addons: []
   resources:
     web:

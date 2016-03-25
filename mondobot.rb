@@ -19,7 +19,7 @@ class Mondobot < Sinatra::Base
 
   def log(msg)
     @log ||= Logger.new(STDOUT)
-    @log.error(msg)
+    @log.info(msg)
   end
 
   def client
@@ -29,6 +29,7 @@ class Mondobot < Sinatra::Base
   end
 
   def app_to_channel(app)
+    log("app_to_channel: #{app}")
     {
       'the-mondobot' => '#testing-grounds',
       'foxinsight-dev' => '#mjff',
@@ -54,6 +55,7 @@ class Mondobot < Sinatra::Base
 
   # translate github handle to slack user. If they are the same, no need to add :)
   def github_user_to_slack_user(user)
+    log("user: #{user}")
     {
       'Jasmine-Feldmann' => 'jasminefeldmann',
       'jmyers0022' => 'jake',
@@ -67,6 +69,10 @@ class Mondobot < Sinatra::Base
   end
 
   def post_message(channel, message)
+    if channel.empty?
+      log("missing channel: #{channel}")
+      return
+    end
     client.chat_postMessage(
       channel: channel,
       text: message,
