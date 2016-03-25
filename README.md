@@ -22,8 +22,15 @@ This project utilizes the Heroku Builder gem for configuration and deployment.  
 
 ## Configuration
 
+### All Integrations
+In order for the Slackbot to send messages to a channel, it needs to be invited to that channel!  Inviting is simple:
+
+```
+/invite @therobot
+```
+
 ### Heroku
-Adding Heroku notifications to a channel is a two step process. Fist, add the Heroku project and Slack channle to the `app_to_channel` method in the `mondobot.rb` class:
+Adding Heroku notifications to a channel is a two step process. First, add the Heroku project and Slack channel to the `app_to_channel` method in the `mondobot.rb` class:
 
 ```ruby
   def app_to_channel(app)
@@ -39,3 +46,8 @@ The key is the Heroku app name, and the value is the channel (make sure to inclu
 heroku addons:create deployhooks:http --url=http://the-mondobot.herokuapp.com/heroku -a the-mondobot
 ```
 
+### Github
+
+To add PR @mentions to a project, make sure the Github project name and Slack channel is in the `app_to_channel` method. Also, verify that all developers on the project are listed in the `github_user_to_slack_user` method.  If a user has the same handle for Slack and Github, no need to do anything!
+
+Add a webhook to Github.  `Payload URL` should be set to: `http://the-mondobot.herokuapp.com/github`.  Choose `Let me select individual events.`, and check 'Pull Request'.  Then save and verify the webhook was successful.
