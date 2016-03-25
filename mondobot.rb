@@ -38,7 +38,12 @@ class Mondobot < Sinatra::Base
       'foxinsight-clinical-trial-dev' => '#mjff',
       'foxinsight-clinical-trial-stg' => '#mjff',
       'fi-survey-builder-dev' => '#mjff',
-      'fi-survey-builder-stg' => '#mjff'
+      'fi-survey-builder-stg' => '#mjff',
+      'comcast-simon-dev' => '#comcast-simon',
+      'comcast-simon-qa' => '#comcast-simon',
+      'comcast-simon-stg' => '#comcast-simon',
+      'comcast-simon-test' => '#comcast-simon',
+      'comcast-tn-reservation-dev' => '#comcast-tn-res'
     }[app]
   end
 
