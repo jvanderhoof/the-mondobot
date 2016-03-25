@@ -54,7 +54,10 @@ class Mondobot < Sinatra::Base
       'jmyers0022' => 'jake',
       'mhfen' => 'fender',
       'mrjman' => 'jesse',
-      'subsociety' => 'jonmck'
+      'subsociety' => 'jonmck',
+      'Roballen' => 'roballen',
+      'asymptotik' => 'rick',
+      'sellestad' => 'stephen'
     }[user] || user
   end
 
