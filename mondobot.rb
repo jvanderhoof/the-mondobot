@@ -69,10 +69,7 @@ class Mondobot < Sinatra::Base
   end
 
   def post_message(channel, message)
-    if channel.empty?
-      log("missing channel: #{channel}")
-      return
-    end
+    log "posting to: #{channel}"
     client.chat_postMessage(
       channel: channel,
       text: message,
