@@ -68,7 +68,9 @@ class Mondobot < Sinatra::Base
       'sellestad' => 'steve@mondorobot.com',
       'justinhillsjohnson' => 'justin@mondorobot.com',
       'asymptotik' => 'rick@mondorobot.com',
-      'bgeerdes' => 'bruce@mondorobot.com'
+      'bgeerdes' => 'bruce@mondorobot.com',
+      'geoffreytice' => 'geoff@mondorobot.com',
+      'gwieronski' => 'garrett@mondorobot.com'
     }[user] || user
   end
 
