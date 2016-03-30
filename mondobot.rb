@@ -1,12 +1,10 @@
 class Mondobot < Sinatra::Base
   post '/heroku' do
-    log(params)
     heroku_message(params)
     halt 200
   end
 
   post '/github' do
-    #log(request.body.read)
     github_webhook(request.body.read)
     halt 200
   end
