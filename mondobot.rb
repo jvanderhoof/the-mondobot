@@ -115,6 +115,7 @@ class Mondobot < Sinatra::Base
   end
 
   def github_pr_comment(msg)
+    return unless msg['comment']['body'] =~ /@([\w\d]+)/
     github_pr_notification(
       msg['comment']['body'],
       msg['issue']['html_url'],
@@ -144,7 +145,7 @@ class Mondobot < Sinatra::Base
   end
 
   def user_callout(users)
-    [*users].map { |user| "<@#{slack_user_id(user)}>" }.join(', ')
+    [*users].compact.map { |user| "<@#{slack_user_id(user)}>" }.join(', ')
   end
 
   def heroku_message(msg_hsh)
