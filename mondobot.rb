@@ -7,7 +7,7 @@ class Mondobot < Sinatra::Base
 
   post '/github' do
     #log(request.body.read)
-    github_pr_message(request.body.read)
+    github_webhook(request.body.read)
     halt 200
   end
 
@@ -68,6 +68,10 @@ class Mondobot < Sinatra::Base
     }[user] || user
   end
 
+  def slack_user_id(slack_name)
+    client.users_info(user: "@#{slack_name}").user.id
+  end
+
   def post_message(channel, message)
     log "posting to: #{channel}"
     client.chat_postMessage(
@@ -83,17 +87,48 @@ class Mondobot < Sinatra::Base
     end
   end
 
+  def github_webhook(webhook)
+    msg = JSON.parse(webhook)
+    if msg.key?('pull_request') && msg['action'] =~ /opened/
+      github_pr_message(msg)
+    elsif msg.key?('comment') && msg.key?('issue') && msg['action'] =~ /created/
+      github_pr_comment(msg)
+    # elsif msg.key?('comment')
+    #   github_pr_comment(msg)
+    end
+  end
+
+  def github_pr_comment(msg)
+    github_pr_notification(
+      msg['comment']['body'],
+      msg['issue']['html_url'],
+      msg['repository']['name']
+    )
+  end
+
   def github_pr_message(msg)
-    webhook = JSON.parse(msg)
-    return unless webhook.key?('pull_request') && webhook['pull_request'].key?('body')
-    users = webhook['pull_request']['body'].scan(/@([\w\d]+)/).flatten.map { |user| github_user_to_slack_user(user) }
-    return if users.empty?
-    msg = "#{user_callout(users).join(', ')} - PR Review Requested: #{webhook['pull_request']['html_url']}"
-    message_to_slack(webhook['repository']['name'], msg)
+    github_pr_notification(
+      msg['pull_request']['body'],
+      msg['pull_request']['html_url'],
+      msg['repository']['name']
+    )
+  end
+
+  def github_pr_notification(user_body, pr_link, repo_name)
+    user_callout = github_user_callout_to_slack_callout(user_body)
+    slack_msg = "#{user_callout} - PR Review Requested: #{pr_link}"
+    message_to_slack(repo_name, slack_msg)
+  end
+
+  def github_user_callout_to_slack_callout(message_body)
+    users = message_body.scan(/@([\w\d]+)/).flatten.map do |user|
+      github_user_to_slack_user(user)
+    end
+    users.empty? ? '<!here>' : user_callout(users)
   end
 
   def user_callout(users)
-    [*users].map { |user| "@#{user}" }
+    [*users].map { |user| "<@#{slack_user_id(user)}>" }.join(', ')
   end
 
   def heroku_message(msg_hsh)
