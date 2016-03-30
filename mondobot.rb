@@ -93,9 +93,15 @@ class Mondobot < Sinatra::Base
       github_pr_message(msg)
     elsif msg.key?('comment') && msg.key?('issue') && msg['action'] =~ /created/
       github_pr_comment(msg)
-    # elsif msg.key?('comment')
-    #   github_pr_comment(msg)
+    elsif msg.key?('comment')
+      github_pr_feedback(msg)
     end
+  end
+
+  def github_pr_feedback(msg)
+    target_user = user_callout(github_user_to_slack_user(msg['pull_request']['user']['login']))
+    slack_msg = "#{target_user} - Feedback on your PR: #{msg['pull_request']['html_url']}"
+    message_to_slack(msg['repository']['name'], slack_msg)
   end
 
   def github_pr_comment(msg)
