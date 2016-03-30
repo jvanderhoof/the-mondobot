@@ -52,22 +52,34 @@ class Mondobot < Sinatra::Base
   end
 
   # translate github handle to slack user. If they are the same, no need to add :)
-  def github_user_to_slack_user(user)
-    log("user: #{user}")
+  def github_user_to_slack_email(user)
+    log("github_user_to_slack_email: #{user}")
     {
-      'Jasmine-Feldmann' => 'jasminefeldmann',
-      'jmyers0022' => 'jake',
-      'mhfen' => 'fender',
-      'mrjman' => 'jesse',
-      'subsociety' => 'jonmck',
-      'Roballen' => 'roballen',
-      'asymptotik' => 'rick',
-      'sellestad' => 'stephen'
+      'cprater' => 'cprater@mondorobot.com',
+      'lostatseajoshua' => 'joshua@mondorobot.com',
+      'jmyers0022' => 'jake@mondorobot.com',
+      'mrjman' => 'jesse@mondorobot.com',
+      'jvanderhoof' => 'jason@mondorobot.com',
+      'mhfen' => 'mfender@mondorobot.com',
+      'Jasmine-Feldmann' => 'jasmine@mondorobot.com',
+      'subsociety' => 'jon@mondorobot.com',
+      'Roballen' => 'rob@mondorobot.com',
+      'mondo-todd' => 'todd@mondorobot.com',
+      'sellestad' => 'steve@mondorobot.com',
+      'justinhillsjohnson' => 'justin@mondorobot.com',
+      'asymptotik' => 'rick@mondorobot.com',
+      'bgeerdes' => 'bruce@mondorobot.com'
     }[user] || user
   end
 
-  def slack_user_id(slack_name)
-    client.users_info(user: "@#{slack_name}").user.id
+  def slack_user_id(slack_email)
+    log "slack_user_id: #{slack_email}"
+    @users ||= {}.tap do |hsh|
+      client.users_list['members'].each do |user|
+        hsh[user['profile']['email']] = user['id']
+      end
+    end
+    @users[slack_email]
   end
 
   def post_message(channel, message)
@@ -97,7 +109,7 @@ class Mondobot < Sinatra::Base
   end
 
   def github_pr_feedback(msg)
-    target_user = user_callout(github_user_to_slack_user(msg['pull_request']['user']['login']))
+    target_user = user_callout(github_user_to_slack_email(msg['pull_request']['user']['login']))
     slack_msg = "#{target_user} - Feedback on your PR: #{msg['pull_request']['html_url']}"
     message_to_slack(msg['repository']['name'], slack_msg)
   end
@@ -126,7 +138,7 @@ class Mondobot < Sinatra::Base
 
   def github_user_callout_to_slack_callout(message_body)
     users = message_body.scan(/@([\w\d]+)/).flatten.map do |user|
-      github_user_to_slack_user(user)
+      github_user_to_slack_email(user)
     end
     users.empty? ? '<!here>' : user_callout(users)
   end
