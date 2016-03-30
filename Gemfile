@@ -17,3 +17,7 @@ gem 'heroku_builder'
 group :production do
   gem 'thin'
 end
+
+group :development do
+  gem 'pry'
+end
