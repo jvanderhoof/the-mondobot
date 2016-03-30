@@ -7,7 +7,7 @@ class Mondobot < Sinatra::Base
 
   post '/github' do
     #log(request.body.read)
-    github_pr_message(request.body.read)
+    github_webhook(request.body.read)
     halt 200
   end
 
@@ -87,13 +87,27 @@ class Mondobot < Sinatra::Base
     end
   end
 
+  def github_webhook(webhook)
+    msg = JSON.parse(webhook)
+    if msg.key?('pull_request') && msg['action'] =~ /opened/
+      github_pr_message(msg)
+    elsif msg.key?('comment')
+      github_pr_comment(msg)
+    end
+  end
+
+  def github_pr_comment(msg)
+
+  end
+
   def github_pr_message(msg)
-    webhook = JSON.parse(msg)
-    return unless webhook.key?('pull_request') && webhook['pull_request'].key?('body')
-    users = webhook['pull_request']['body'].scan(/@([\w\d]+)/).flatten.map { |user| github_user_to_slack_user(user) }
-    return if users.empty?
-    msg = "#{user_callout(users)} - PR Review Requested: #{webhook['pull_request']['html_url']}"
-    message_to_slack(webhook['repository']['name'], msg)
+    log msg.keys.inspect
+    users = msg['pull_request']['body'].scan(/@([\w\d]+)/).flatten.map do |user|
+      github_user_to_slack_user(user)
+    end
+    callout = users.empty? ? '<!here>' : user_callout(users)
+    slack_msg = "#{callout} - PR Review Requested: #{msg['pull_request']['html_url']}"
+    message_to_slack(msg['repository']['name'], slack_msg)
   end
 
   def user_callout(users)
