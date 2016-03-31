@@ -9,6 +9,11 @@ class Mondobot < Sinatra::Base
     halt 200
   end
 
+  post '/jira' do
+    log(request.body.read)
+    halt 200
+  end
+
   get '/testing' do
     'testing: 1, 2, 3, .....'
   end
