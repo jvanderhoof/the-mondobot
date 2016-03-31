@@ -5,12 +5,12 @@ class Mondobot < Sinatra::Base
   end
 
   post '/github' do
-    github_webhook(request.body.read)
+    github_webhook(JSON.parse(request.body.read))
     halt 200
   end
 
   post '/jira' do
-    log(request.body.read)
+    jira_webhook(JSON.parse(request.body.read))
     halt 200
   end
 
@@ -29,6 +29,14 @@ class Mondobot < Sinatra::Base
     @client ||= Slack::Web::Client.new
     @client.auth_test
     @client
+  end
+
+  def project_key_to_channel(project)
+    log "project: #{project}"
+    {
+      'FI' => '#mjff',
+      'QE' => '#mjff'
+    }[project]
   end
 
   def app_to_channel(app)
@@ -98,14 +106,14 @@ class Mondobot < Sinatra::Base
     )
   end
 
-  def message_to_slack(project_name, message)
-    app_to_channel(project_name).split(',').each do |channel|
+  def message_to_slack(project_name, message, converter = :app_to_channel)
+    #app_to_channel(project_name)
+    send(converter, project_name).split(',').each do |channel|
       post_message(channel, message)
     end
   end
 
-  def github_webhook(webhook)
-    msg = JSON.parse(webhook)
+  def github_webhook(msg)
     if msg.key?('pull_request') && msg['action'] =~ /opened/
       github_pr_message(msg)
     elsif msg.key?('comment') && msg.key?('issue') && msg['action'] =~ /created/
@@ -164,5 +172,34 @@ class Mondobot < Sinatra::Base
     ```
     EOF
     message_to_slack(app, message)
+  end
+
+  def jira_webhook(msg)
+    case msg['issue_event_type_name']
+    when 'issue_assigned'
+      jira_issue_assigned(msg['issue'])
+    when 'issue_commented'
+      jira_issue_commented(msg['issue'])
+    end
+  end
+
+  def jira_ticket_url(key)
+    "https://mondorobot.atlassian.net/browse/#{key}"
+  end
+
+  def jira_issue_commented(issue)
+    assigned_user = issue['fields']['assignee']['emailAddress']
+    return if assigned_user.empty?
+    key = issue['key']
+    comment = issue['fields']['comment']['comments'].last['body']
+    slack_message = "#{user_callout(assigned_user)} - Jira Comment: #{comment} (#{jira_ticket_url(key)})"
+    message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
+  end
+
+  def jira_issue_assigned(issue)
+    assigned_user = issue['fields']['assignee']['emailAddress']
+    key = issue['key']
+    slack_message = "#{user_callout(assigned_user)} - You were assigned: #{jira_ticket_url(key)}"
+    message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
   end
 end
