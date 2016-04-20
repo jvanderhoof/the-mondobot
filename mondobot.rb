@@ -160,7 +160,12 @@ class Mondobot < Sinatra::Base
   end
 
   def user_callout(users)
-    [*users].compact.map { |user| "<@#{slack_user_id(user)}>" }.join(', ')
+    [].tap do |arr|
+      [*users].compact.each do |user|
+        slack_user = slack_user_id(user)
+        arr << "<@#{slack_user_id(user)}>" unless slack_user.to_s.empty?
+      end
+    end.join(', ')
   end
 
   def heroku_message(msg_hsh)
@@ -192,14 +197,20 @@ class Mondobot < Sinatra::Base
     return if assigned_user.empty?
     key = issue['key']
     comment = issue['fields']['comment']['comments'].last['body']
-    slack_message = "#{user_callout(assigned_user)} - Jira Comment: #{comment} (#{jira_ticket_url(key)})"
-    message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
+    slack_user = user_callout(assigned_user)
+    unless slack_user.empty?
+      slack_message = "#{slack_user} - Jira Comment: #{comment} (#{jira_ticket_url(key)})"
+      message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
+    end
   end
 
   def jira_issue_assigned(issue)
     assigned_user = issue['fields']['assignee']['emailAddress']
     key = issue['key']
-    slack_message = "#{user_callout(assigned_user)} - You were assigned: #{jira_ticket_url(key)}"
-    message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
+    slack_user = user_callout(assigned_user)
+    unless slack_user.empty?
+      slack_message = "#{user_callout(assigned_user)} - You were assigned: #{jira_ticket_url(key)}"
+      message_to_slack(issue['fields']['project']['key'], slack_message, :project_key_to_channel)
+    end
   end
 end
